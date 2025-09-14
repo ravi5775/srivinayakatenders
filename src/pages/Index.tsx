@@ -20,14 +20,12 @@ import { UserDetailsDialog } from '@/components/dashboard/UserDetailsDialog';
 
 import { TenderManager } from '@/components/tenders/TenderManager';
 import { Customer } from '@/types/loan';
-import EnhancedGoogleSheetsService from '@/services/EnhancedGoogleSheetsService';
 
 const Index = () => {
   const { isAuthenticated, adminEmail, logout } = useAuth();
   const { customers, payments, loading, addCustomer, updateCustomer, recordPayment, getDashboardSummary } = useLoanData();
   const { t } = useLanguage();
   const { toast } = useToast();
-  const sheetsService = EnhancedGoogleSheetsService.getInstance();
   
   // UI State
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,7 +42,6 @@ const Index = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [selectedTenderType, setSelectedTenderType] = useState<'DailyPlan' | 'MonthlyPlan' | null>(null);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'tenders'>('dashboard');
-  const [syncing, setSyncing] = useState(false);
 
   // Filter customers based on search and filters
   const filteredCustomers = useMemo(() => {
@@ -75,7 +72,16 @@ const Index = () => {
     setIsCustomerFormOpen(true);
   };
 
-  const handleEditCustomer = (customer: Customer) => {
+  const handleEditCustomer = async (customer: Customer) => {
+    // If loan is completed, allow quick reissue
+    if (customer.status === 'COMPLETED') {
+      const confirmReissue = confirm('This loan is closed. Reissue loan and set status to ACTIVE?');
+      if (confirmReissue) {
+        await updateCustomer(customer.customerID, { status: 'ACTIVE' });
+        toast({ title: 'Loan reissued', description: `${customer.name}'s loan status set to ACTIVE` });
+        return;
+      }
+    }
     setEditingCustomer(customer);
     setSelectedTenderType(null);
     setIsCustomerFormOpen(true);
@@ -110,23 +116,29 @@ const Index = () => {
   };
 
   const handleExportCSV = () => {
-    const csvData = filteredCustomers.map(customer => ({
-      CustomerID: customer.customerID,
-      Name: customer.name,
-      Phone: customer.phone,
-      TenderName: customer.tenderName,
-      Principal: customer.principal,
-      RemainingAmount: customer.remainingAmount,
-      NextDueDate: customer.nextDueDate,
-      Status: customer.status
-    }));
-    
-    const csv = [
-      Object.keys(csvData[0]).join(','),
-      ...csvData.map(row => Object.values(row).join(','))
-    ].join('\n');
-    
-    const blob = new Blob([csv], { type: 'text/csv' });
+    // Export summary with required columns + remaining installments and paid billing dates
+    const csvRows: string[] = [];
+    const header = ['Customer','Tender Name','Type','Installment','Remaining','Next Due','Status','Remaining Installments','Paid Billing Dates'];
+    csvRows.push(header.join(','));
+
+    filteredCustomers.forEach(customer => {
+      const customerPayments = payments.filter(p => p.customerID === customer.customerID);
+      const paidDates = customerPayments.map(p => p.dateOfPayment).join('; ');
+      const row = [
+        `${customer.name} (${customer.customerID})`,
+        customer.tenderName,
+        customer.installmentType === 'DAY' ? 'Daily' : 'Monthly',
+        `${customer.installmentAmount}`,
+        `${customer.remainingAmount}`,
+        `${customer.nextDueDate}`,
+        customer.status,
+        `${customer.remainingInstallments}`,
+        `"${paidDates}"`
+      ];
+      csvRows.push(row.join(','));
+    });
+
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -183,24 +195,6 @@ const Index = () => {
     a.click();
   };
 
-  const handleSyncToSheets = async () => {
-    setSyncing(true);
-    try {
-      await sheetsService.syncAll();
-      toast({
-        title: t('Success'),
-        description: 'Data synced to Google Sheets successfully',
-      });
-    } catch (error) {
-      toast({
-        title: t('Error'),
-        description: 'Failed to sync data to Google Sheets',
-        variant: 'destructive'
-      });
-    } finally {
-      setSyncing(false);
-    }
-  };
 
   console.log('Index - Auth state:', { isAuthenticated, adminEmail });
 
@@ -233,7 +227,7 @@ const Index = () => {
                   onClick={() => setActiveTab('dashboard')}
                   className={activeTab === 'dashboard' ? 'bg-primary/10' : ''}
                 >
-                  Dashboard
+                  {t('nav.dashboard')}
                 </Button>
                 <Button 
                   variant="outline" 
@@ -241,7 +235,7 @@ const Index = () => {
                   onClick={() => setActiveTab('tenders')}
                   className={activeTab === 'tenders' ? 'bg-primary/10' : ''}
                 >
-                  Tenders
+                  {t('nav.tenders')}
                 </Button>
               </div>
               <div className="text-sm">
@@ -250,7 +244,7 @@ const Index = () => {
               </div>
               <Button variant="outline" size="sm" onClick={() => setIsStatusOpen(true)}>
                 <Activity className="h-4 w-4 mr-2" />
-                System Status
+                {t('system.status')}
               </Button>
               <Button variant="outline" size="sm" onClick={() => setIsSettingsOpen(true)}>
                 <Settings className="h-4 w-4 mr-2" />
@@ -283,7 +277,7 @@ const Index = () => {
               <div className="flex gap-2">
                 <Button variant="outline" onClick={handleExportTransactions}>
                   <Download className="h-4 w-4 mr-2" />
-                  Export Transactions
+                  {t('actions.exportTransactions')}
                 </Button>
                 <Button onClick={() => handleAddCustomer()}>
                   <Plus className="h-4 w-4 mr-2" />
@@ -303,8 +297,6 @@ const Index = () => {
               dateFilter={dateFilter}
               onDateFilterChange={setDateFilter}
               onExport={handleExportCSV}
-              onSync={handleSyncToSheets}
-              syncing={syncing}
             />
 
             {/* Customer Table */}

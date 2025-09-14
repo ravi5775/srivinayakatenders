@@ -33,6 +33,8 @@ const translations = {
     'filter.search': 'Search by name, phone, or ID...',
     'filter.installmentType': 'Installment Type',
     'filter.all': 'All',
+    'filter.allTypes': 'All Types',
+    'filter.allStatus': 'All Status',
     'filter.status': 'Status',
     'filter.dueDate': 'Due Date',
     'filter.export': 'Export CSV',
@@ -86,6 +88,40 @@ const translations = {
     'login.login': 'Login',
     'login.demoCredentials': 'Use Demo Credentials',
     'login.invalidCredentials': 'Invalid credentials',
+
+    // Navigation & System
+    'nav.dashboard': 'Dashboard',
+    'nav.tenders': 'Tenders',
+    'system.status': 'System Status',
+
+    // Charts
+    'charts.monthlyCollections': 'Monthly Collections',
+    'charts.collectionsDesc': 'Collection trends over the last 6 months',
+    'charts.collectionsLabel': 'Collections (₹)',
+    'charts.portfolioSplit': 'Portfolio Split',
+    'charts.portfolioDesc': 'Distribution of customers by installment type',
+
+    // Actions
+    'actions.exportTransactions': 'Export Transactions',
+    'actions.print': 'Print',
+
+    // Details
+    'details.customerDetails': 'Customer Details',
+    'details.customerInformation': 'Customer Information',
+    'details.loanSummary': 'Loan Summary',
+    'details.installmentDetails': 'Installment Details',
+    'details.paymentLogbook': 'Payment Logbook',
+    'details.payments': 'payments',
+    'details.total': 'Total',
+    'details.noPayments': 'No payments recorded yet',
+    'details.progress': 'Progress',
+    'details.notes': 'Notes',
+
+    // Table extras
+    'table.installments': 'installments',
+
+    // Misc
+    'dashboard.fromLastMonth': 'from last month',
     
     // Settings
     'settings.title': 'Admin Settings',
@@ -130,6 +166,8 @@ const translations = {
     'filter.search': 'పేరు, ఫోన్, లేదా ID ద్వారా వెతకండి...',
     'filter.installmentType': 'వాయిదా రకం',
     'filter.all': 'అన్నీ',
+    'filter.allTypes': 'అన్ని రకాలు',
+    'filter.allStatus': 'అన్ని స్థితులు',
     'filter.status': 'స్థితి',
     'filter.dueDate': 'చెల్లింపు తేదీ',
     'filter.export': 'CSV ఎగుమతి',
@@ -183,6 +221,40 @@ const translations = {
     'login.login': 'లాగిన్',
     'login.demoCredentials': 'డెమో క్రెడెన్షియల్స్ వాడు',
     'login.invalidCredentials': 'చెల్లని ఆధారాలు',
+
+    // Navigation & System
+    'nav.dashboard': 'డాష్‌బోర్డ్',
+    'nav.tenders': 'టెండర్లు',
+    'system.status': 'సిస్టమ్ స్థితి',
+
+    // Charts
+    'charts.monthlyCollections': 'మాసిక వసూళ్లు',
+    'charts.collectionsDesc': 'గత 6 నెలల వసూళ్ల ధోరణులు',
+    'charts.collectionsLabel': 'వసూళ్లు (₹)',
+    'charts.portfolioSplit': 'పోర్ట్‌ఫోలియో విభజన',
+    'charts.portfolioDesc': 'వాయిదా రకం ప్రకారం కస్టమర్ల పంపిణీ',
+
+    // Actions
+    'actions.exportTransactions': 'లావాదేవీలు ఎగుమతి',
+    'actions.print': 'ప్రింట్',
+
+    // Details
+    'details.customerDetails': 'కస్టమర్ వివరాలు',
+    'details.customerInformation': 'కస్టమర్ సమాచారం',
+    'details.loanSummary': 'ఋణ సారాంశం',
+    'details.installmentDetails': 'వాయిదా వివరాలు',
+    'details.paymentLogbook': 'చెల్లింపు లాగ్‌బుక్',
+    'details.payments': 'చెల్లింపులు',
+    'details.total': 'మొత్తం',
+    'details.noPayments': 'ఇంకా చెల్లింపులు లేవు',
+    'details.progress': 'పురోగతి',
+    'details.notes': 'గమనికలు',
+
+    // Table extras
+    'table.installments': 'వాయిదాలు',
+
+    // Misc
+    'dashboard.fromLastMonth': 'గత నెలతో పోల్చితే',
     
     // Settings
     'settings.title': 'అడ్మిన్ సెట్టింగ్‌లు',

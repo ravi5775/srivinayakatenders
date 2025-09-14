@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2, CreditCard, Eye } from 'lucide-react';
 import { Customer } from '@/types/loan';
 import { format } from 'date-fns';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CustomerTableProps {
   customers: Customer[];
@@ -20,6 +21,7 @@ export const CustomerTable = ({
   onAddPayment,
   onViewDetails
 }: CustomerTableProps) => {
+  const { t } = useLanguage();
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ACTIVE': return 'bg-success text-success-foreground';
@@ -42,14 +44,14 @@ export const CustomerTable = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Customer</TableHead>
-            <TableHead>Tender Name</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Installment</TableHead>
-            <TableHead>Remaining</TableHead>
-            <TableHead>Next Due</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>{t('table.name')}</TableHead>
+            <TableHead>{t('table.tenderName')}</TableHead>
+            <TableHead>{t('form.installmentType')}</TableHead>
+            <TableHead>{t('table.installmentAmount')}</TableHead>
+            <TableHead>{t('table.remainingAmount')}</TableHead>
+            <TableHead>{t('table.nextDueDate')}</TableHead>
+            <TableHead>{t('table.status')}</TableHead>
+            <TableHead className="text-right">{t('table.actions')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -65,7 +67,7 @@ export const CustomerTable = ({
               <TableCell>{customer.tenderName}</TableCell>
               <TableCell>
                 <Badge variant="outline">
-                  {customer.installmentType === 'DAY' ? 'Daily' : 'Monthly'}
+                  {customer.installmentType === 'DAY' ? t('filter.daily') : t('filter.monthly')}
                 </Badge>
               </TableCell>
               <TableCell>₹{customer.installmentAmount.toLocaleString('en-IN')}</TableCell>
@@ -73,7 +75,7 @@ export const CustomerTable = ({
                 <div>
                   <div className="font-medium">₹{customer.remainingAmount.toLocaleString('en-IN')}</div>
                   <div className="text-xs text-muted-foreground">
-                    {customer.remainingInstallments} installments
+                    {customer.remainingInstallments} {t('table.installments')}
                   </div>
                 </div>
               </TableCell>

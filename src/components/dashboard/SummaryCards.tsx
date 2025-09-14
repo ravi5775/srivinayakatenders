@@ -1,36 +1,38 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, DollarSign, Users } from 'lucide-react';
 import { DashboardSummary } from '@/types/loan';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface SummaryCardsProps {
   summary: DashboardSummary;
 }
 
 export const SummaryCards = ({ summary }: SummaryCardsProps) => {
+  const { t } = useLanguage();
   const cards = [
     {
-      title: 'Total Given',
+      title: t('dashboard.totalGiven'),
       value: `₹${summary.totalGiven.toLocaleString('en-IN')}`,
       icon: DollarSign,
       trend: '+12.5%',
       trendUp: true
     },
     {
-      title: 'Total Collected',
+      title: t('dashboard.totalCollected'),
       value: `₹${summary.totalCollected.toLocaleString('en-IN')}`,
       icon: TrendingUp,
       trend: '+8.2%',
       trendUp: true
     },
     {
-      title: 'Outstanding',
+      title: t('dashboard.outstanding'),
       value: `₹${summary.totalOutstanding.toLocaleString('en-IN')}`,
       icon: TrendingDown,
       trend: '-5.1%',
       trendUp: false
     },
     {
-      title: 'Total Profit',
+      title: t('dashboard.totalProfit'),
       value: `₹${summary.totalProfit.toLocaleString('en-IN')}`,
       icon: Users,
       trend: '+15.3%',
@@ -52,7 +54,7 @@ export const SummaryCards = ({ summary }: SummaryCardsProps) => {
             <div className="text-2xl font-bold text-foreground">{card.value}</div>
             <p className={`text-xs ${card.trendUp ? 'text-success' : 'text-destructive'} flex items-center mt-1`}>
               {card.trendUp ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
-              {card.trend} from last month
+              {card.trend} {t('dashboard.fromLastMonth')}
             </p>
           </CardContent>
         </Card>
