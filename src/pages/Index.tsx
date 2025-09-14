@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, LogOut, BarChart3, Users, Settings, RefreshCw, Database, Activity } from 'lucide-react';
+import { Plus, LogOut, BarChart3, Users, Settings, RefreshCw, Database, Activity, Download, Eye } from 'lucide-react';
+import lordVinayakaLogo from '@/assets/lord-vinayaka-logo.png';
 import { useAuth } from '@/hooks/useAuth';
 import { useLoanData } from '@/hooks/useLoanData';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -15,6 +16,7 @@ import { CustomerForm } from '@/components/forms/CustomerForm';
 import { PaymentForm } from '@/components/forms/PaymentForm';
 import { AdminSettings } from '@/components/settings/AdminSettings';
 import { SystemStatus } from '@/components/dashboard/SystemStatus';
+import { UserDetailsDialog } from '@/components/dashboard/UserDetailsDialog';
 
 import { TenderManager } from '@/components/tenders/TenderManager';
 import { Customer } from '@/types/loan';
@@ -36,6 +38,7 @@ const Index = () => {
   const [isPaymentFormOpen, setIsPaymentFormOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
+  const [isUserDetailsOpen, setIsUserDetailsOpen] = useState(false);
   
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -90,8 +93,8 @@ const Index = () => {
   };
 
   const handleViewDetails = (customer: Customer) => {
-    // In a real app, this would open a detailed view
-    console.log('View details for:', customer);
+    setSelectedCustomer(customer);
+    setIsUserDetailsOpen(true);
   };
 
   const handleCustomerSubmit = async (customerData: Omit<Customer, 'customerID'>) => {
@@ -131,6 +134,55 @@ const Index = () => {
     a.click();
   };
 
+  const handleExportTransactions = () => {
+    // Create transaction data with payment history
+    const transactionData = customers.flatMap(customer => {
+      const customerPayments = payments.filter(p => p.customerID === customer.customerID);
+      
+      // Add loan taken record
+      const loanRecord = {
+        CustomerID: customer.customerID,
+        CustomerName: customer.name,
+        Phone: customer.phone,
+        TransactionType: 'Loan Taken',
+        Amount: customer.principal,
+        Date: customer.startDate || new Date().toISOString().split('T')[0],
+        TenderName: customer.tenderName,
+        RemainingAmount: customer.remainingAmount,
+        Status: customer.status
+      };
+
+      // Add payment records
+      const paymentRecords = customerPayments.map(payment => ({
+        CustomerID: customer.customerID,
+        CustomerName: customer.name,
+        Phone: customer.phone,
+        TransactionType: 'Payment Received',
+        Amount: payment.amountPaid,
+        Date: payment.dateOfPayment,
+        TenderName: customer.tenderName,
+        RemainingAmount: '',
+        Status: 'Paid'
+      }));
+
+      return [loanRecord, ...paymentRecords];
+    });
+
+    const csv = [
+      'Customer ID,Customer Name,Phone,Transaction Type,Amount,Date,Tender Name,Remaining Amount,Status',
+      ...transactionData.map(row => 
+        `${row.CustomerID},${row.CustomerName},${row.Phone},${row.TransactionType},${row.Amount},${row.Date},${row.TenderName},${row.RemainingAmount},${row.Status}`
+      )
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `transaction_report_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+  };
+
   const handleSyncToSheets = async () => {
     setSyncing(true);
     try {
@@ -157,15 +209,17 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-primary/5">
       {/* Header */}
       <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                <BarChart3 className="h-5 w-5 text-primary" />
-              </div>
+              <img 
+                src={lordVinayakaLogo} 
+                alt="Lord Vinayaka" 
+                className="h-10 w-10 rounded-lg object-contain"
+              />
             <div>
               <h1 className="text-2xl font-bold text-primary">{t('header.title')}</h1>
               <p className="text-sm text-muted-foreground">{t('header.subtitle')}</p>
@@ -226,10 +280,16 @@ const Index = () => {
                 <Users className="h-5 w-5 text-muted-foreground" />
                 <h2 className="text-xl font-semibold">{t('dashboard.customers')} ({filteredCustomers.length})</h2>
               </div>
-              <Button onClick={() => handleAddCustomer()}>
-                <Plus className="h-4 w-4 mr-2" />
-                {t('dashboard.addCustomer')}
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={handleExportTransactions}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export Transactions
+                </Button>
+                <Button onClick={() => handleAddCustomer()}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t('dashboard.addCustomer')}
+                </Button>
+              </div>
             </div>
 
             {/* Filters */}
@@ -286,6 +346,13 @@ const Index = () => {
         <SystemStatus
           isOpen={isStatusOpen}
           onClose={() => setIsStatusOpen(false)}
+        />
+
+        <UserDetailsDialog
+          isOpen={isUserDetailsOpen}
+          onClose={() => setIsUserDetailsOpen(false)}
+          customer={selectedCustomer}
+          payments={payments}
         />
 
       </main>
