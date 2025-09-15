@@ -10,15 +10,13 @@ import { Eye, EyeOff, Shield, Clock, AlertTriangle, CheckCircle } from 'lucide-r
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
+import lordVinayakaLogo from '@/assets/lord-vinayaka-logo.png';
 
 export const EnhancedLoginForm = () => {
   const { login, isLocked, lockoutEndTime, remainingAttempts } = useAuth();
   const { toast } = useToast();
   const { t } = useLanguage();
-  
-  // Branding
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const logo = require('@/assets/lord-vinayaka-logo.png');
+
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -118,7 +116,7 @@ export const EnhancedLoginForm = () => {
       <Card className="w-full max-w-md shadow-2xl border-border/50">
         <CardHeader className="text-center space-y-4">
           <img
-            src={logo}
+            src={lordVinayakaLogo}
             alt="Lord Ganesh logo - Sri Vinaya Tender Login"
             className="mx-auto w-14 h-14 object-contain rounded-md shadow"
             loading="eager"
