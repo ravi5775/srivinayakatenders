@@ -21,6 +21,7 @@ export const AdminSettings = ({ isOpen, onClose }: AdminSettingsProps) => {
   const { theme, setTheme } = useTheme();
   const { updateCredentials } = useAuth();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [credentialsForm, setCredentialsForm] = useState({
     currentEmail: '',
@@ -29,6 +30,9 @@ export const AdminSettings = ({ isOpen, onClose }: AdminSettingsProps) => {
     newPassword: '',
     confirmPassword: ''
   });
+  
+  const [isBackingUp, setIsBackingUp] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
 
   const handleCredentialsUpdate = async () => {
     if (credentialsForm.newPassword !== credentialsForm.confirmPassword) {
@@ -80,6 +84,59 @@ export const AdminSettings = ({ isOpen, onClose }: AdminSettingsProps) => {
 
   const handleCredentialsChange = (field: string, value: string) => {
     setCredentialsForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleBackupData = async () => {
+    setIsBackingUp(true);
+    try {
+      await backupDataToZip();
+      toast({
+        title: "Success",
+        description: "Data backup downloaded successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error", 
+        description: "Failed to create backup",
+        variant: "destructive",
+      });
+    } finally {
+      setIsBackingUp(false);
+    }
+  };
+
+  const handleRestoreData = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.zip')) {
+      toast({
+        title: "Error",
+        description: "Please select a ZIP backup file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsRestoring(true);
+    try {
+      const result = await restoreFromZip(file);
+      toast({
+        title: "Preview",
+        description: `Backup contains: ${result.files.join(', ')}. Full restore requires Supabase connection.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to read backup file",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRestoring(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
   };
 
   return (
@@ -217,6 +274,58 @@ export const AdminSettings = ({ isOpen, onClose }: AdminSettingsProps) => {
               >
                 {t('settings.updateCredentials')}
               </Button>
+            </CardContent>
+          </Card>
+
+          {/* Data Backup & Restore */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Database className="h-4 w-4" />
+                Data Backup & Restore
+              </CardTitle>
+              <CardDescription>
+                Backup all data to ZIP file or restore from previous backup
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Button
+                  onClick={handleBackupData}
+                  disabled={isBackingUp}
+                  className="w-full"
+                  variant="outline"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  {isBackingUp ? 'Creating Backup...' : 'Download Backup'}
+                </Button>
+                
+                <div className="space-y-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".zip"
+                    onChange={handleRestoreData}
+                    className="hidden"
+                    disabled={isRestoring}
+                  />
+                  <Button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isRestoring}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    {isRestoring ? 'Reading Backup...' : 'Restore from Backup'}
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p>• Backup includes: Customers, Payments, and Logbook data</p>
+                <p>• Files are exported as CSV inside a ZIP archive</p>
+                <p>• Full restore requires Supabase database connection</p>
+              </div>
             </CardContent>
           </Card>
         </div>
