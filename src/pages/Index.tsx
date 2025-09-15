@@ -121,7 +121,7 @@ const Index = () => {
     const header = ['Customer','Tender Name','Type','Installment','Remaining','Next Due','Status','Remaining Installments','Paid Billing Dates'];
     csvRows.push(header.join(','));
 
-    filteredCustomers.forEach(customer => {
+    customers.forEach(customer => {
       const customerPayments = payments.filter(p => p.customerID === customer.customerID);
       const paidDates = customerPayments.map(p => p.dateOfPayment).join('; ');
       const row = [

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,8 +9,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Settings, Languages, Palette, Key } from 'lucide-react';
-
+import { Settings, Languages, Palette, Key, Database, Download, Upload } from 'lucide-react';
+import { backupDataToZip, restoreFromZip } from '@/services/backupService';
 interface AdminSettingsProps {
   isOpen: boolean;
   onClose: () => void;

@@ -15,6 +15,10 @@ export const EnhancedLoginForm = () => {
   const { login, isLocked, lockoutEndTime, remainingAttempts } = useAuth();
   const { toast } = useToast();
   const { t } = useLanguage();
+  
+  // Branding
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const logo = require('@/assets/lord-vinayaka-logo.png');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -113,9 +117,12 @@ export const EnhancedLoginForm = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/20 p-4">
       <Card className="w-full max-w-md shadow-2xl border-border/50">
         <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <Shield className="w-6 h-6 text-primary" />
-          </div>
+          <img
+            src={logo}
+            alt="Lord Ganesh logo - Sri Vinaya Tender Login"
+            className="mx-auto w-14 h-14 object-contain rounded-md shadow"
+            loading="eager"
+          />
           <div>
             <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
               {t('login.title')}
